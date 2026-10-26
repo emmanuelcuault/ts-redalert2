@@ -4,13 +4,11 @@
     "gui:wwbrand": "WESTWOOD STUDIOS™ IS AN ELECTRONIC ARTS™ BRAND",
     "gui:loadingex": "Loading...",
     "ts:disclaimer": "DISCLAIMER:\n\"Chrono Divide\" is a non-profit fan project and is in no way affiliated with Electronic Arts Inc.\nNo copyright infringement is intended. All rights are held by their respective owners.",
-
     "ts:downloading": "Downloading...",
     "ts:downloadingpg": "Downloading... (%.1f%%)",
     "ts:downloadingpgsize": "Downloading %.1f MiB / %.1f MiB... (%d%%)",
     "ts:downloadingpgunkn": "Downloading %.1f MiB...",
     "ts:downloadfailed": "A remote resource could not be downloaded.",
-
     "ts:gameres_locate_title": "Locate original game assets",
     "ts:gameres_import_desc": "If you have a copy of RA2 already installed, you can import it below. You can also choose to import an archive containing *.mix files from the local filesystem or a web URL.",
     "ts:gameres_drop_desc": "Drop the required game files here",
@@ -23,7 +21,6 @@
     "ts:gameres_insecure_url": "You must enter a secure URL (HTTPS).",
     "ts:gameres_download_button": "Download",
     "ts:gameres_download_size": "Download size: ~%d MiB",
-
     "ts:import_preparing_for_import": "Preparing for import...",
     "ts:import_loading_archive": "Loading archive...",
     "ts:import_extracting_archive": "Extracting archive...\n\nThis may take a minute.",
@@ -45,7 +42,6 @@
     "ts:storage_io_error": "A file could not be read from browser storage. Please close this tab and re-open the game in a new tab. If the problem persists, clear all website data and retry.",
     "ts:storage_migrating_file": "Moving \"%s\" to new storage system...",
     "ts:replay_storage_migrating": "Migrating replay storage... (%d%%)",
-
     "ts:warning": "Warning",
     "ts:preloading": "Prefetching assets...",
     "ts:reportbug": "Report a Bug",
@@ -76,7 +72,6 @@
     "ts:stalematewarning": "Stalemate detected! The game will end in %d minutes unless any player trains a unit, constructs a building (except walls), destroys or captures an enemy building, gains resources (if owning at least a production building or Construction Yard).",
     "ts:stalematetimer": "The game will end in:",
     "ts:playerassetssplit": "Units and resources owned by %s have been split among remaining allies.",
-
     "gui:mastervolume": "Master Volume",
     "gui:sfxvolume": "SFX Volume",
     "gui:ambientvolume": "Ambient Volume",
@@ -121,7 +116,6 @@
     "ts:pingvalue": "%d ms",
     "ts:serveroffline": "Offline",
     "ts:serveronline": "Online",
-
     "gui:demo": "Demo Mode",
     "stt:demo": "Play a singleplayer match against a training dummy",
     "gui:aidummy": "Training Dummy",
@@ -139,12 +133,10 @@
     "gui:botupload:nobot": "No custom bots uploaded",
     "gui:botupload:hint": "Upload a .zip file containing bot.ts or index.ts",
     "stt:skirmishbuttonuploadbot": "Upload a custom AI bot script package",
-
     "gui:gameresultwaiting": "Waiting for server results...",
     "gui:gameresultvictory": "Victory!",
     "gui:gameresultdefeat": "Defeat!",
     "gui:gameresultdraw": "Draw!",
-
     "gui:quickmatchgamemode": "Select Mode",
     "gui:ranked": "Ranked",
     "gui:unranked": "Unranked",
@@ -180,7 +172,6 @@
     "gui:laddertype2v2": "2v2",
     "gui:laddertype2v2random": "2v2 Random",
     "gui:laddertype2v2arranged": "2v2 Arranged",
-
     "GUI:RankPrivate": "Private",
     "GUI:RankCorporal": "Corporal",
     "GUI:RankSergeant": "Sergeant",
@@ -191,7 +182,6 @@
     "GUI:RankGeneral": "General",
     "GUI:RankFiveStar": "5-Star General",
     "GUI:RankCmdInChief": "Commander-in-chief",
-
     "gui:team": "Team",
     "gui:teamno": "Team %s",
     "gui:teamgame": "Team Alliance",
@@ -201,7 +191,6 @@
     "stt:hostcombostart": "Player's start position.",
     "stt:hostcomboteam": "Player's team.",
     "txt_cannot_ally": "Must have more than one team to start a game!",
-
     "gui:hostteams": "Host Teams",
     "stt:hostcboxhostteams": "The host chooses the team and starting location for each player",
     "gui:destroyablebridges": "Destroyable Bridges",
@@ -209,7 +198,6 @@
     "gui:nodogengikills": "No Dog Engineer Kills",
     "stt:nodogengikills": "Dogs will be unable to kill engineers.",
     "stt:multiengineer": "Capturing an enemy structure requires %d engineers instead of one.",
-
     "gui:replays": "Replays",
     "stt:replays": "Play back a recording of a previously played game",
     "gui:selectreplay": "Select replay:",
@@ -243,7 +231,6 @@
     "tip:pause": "Pause",
     "tip:replayspeed": "Replay speed",
     "ts:replayspeedconfirm": "Replay speed changed to %s",
-
     "gui:mods": "Mods",
     "stt:mods": "Manage and play modified versions of the base game",
     "gui:selectmod": "Select Mod:",
@@ -286,7 +273,6 @@
     "gui:updatemodprompt": "Version: %s\nDownload Size: %.1d MiB.\n\nDo you want to download it now?",
     "gui:manualdownloadmodprompt": "Please download the mod archive from the following URL, then click the \"Import...\" button from the sidebar to install it.",
     "gui:installmodstoragefull": "There is insufficient space available in browser storage (%d MiB available, %d MiB required). Try freeing some disk space and retry.",
-
     "gui:roomdesc": "Room Description",
     "gui:ping": "Ping",
     "gui:hostname": "Host",
@@ -349,9 +335,7 @@
     "ts:sortname": "Map Name",
     "ts:sortmaxslots": "Max Slots",
     "stt:sortby": "Sorts available maps by the selected criteria",
-
     "ts:storage_quota_warning": "WARNING: New replays may not be saved because browser storage is full (%d of %d MiB used). Please check your browser storage quota, make sure you have sufficient disk space and not browsing in Private mode.",
-
     "gui:storage": "Storage",
     "gui:storageused": "%s of %s used",
     "gui:uploading": "Uploading \"%s\"...",
@@ -372,5 +356,11 @@
     "gui:newfoldernotallowed": "Can't create a new folder here.",
     "gui:newfolderexists": "An entry with that name already exists.",
     "gui:newfolderinvalidname": "Invalid folder name.",
-    "GUI:LoadingFileExplorer": "Loading file explorer..."
+    "GUI:LoadingFileExplorer": "Loading file explorer...",
+    "ts:gameres_download_desc": "Game assets are provided via our community. Join the Discord server for download links and support.",
+    "ts:gameres_download_hint": "Tip: After joining the community, download the full game pack from shared files and keep it on your local disk.",
+    "wol:matchjoininggame": "Joining game...",
+    "wol:matchwaitingforplayers": "Waiting for opponent to join...",
+    "GUI:OKAY": "OK",
+    "GUI:AlmostReady": "Almost ready..."
 }

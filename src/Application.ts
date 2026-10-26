@@ -198,14 +198,15 @@ export class Application {
             const virtualFile = new VirtualFile(dataStream, csfFileName);
             const csfFileInstance = new CsfFile(virtualFile);
             this.strings = new Strings(csfFileInstance);
-            this.currentLocale = csfFileInstance.getIsoLocale() || currentConfig.defaultLocale;
-            console.log(`[Application] CSF file "${csfFileName}" loaded. Detected/Set Locale: ${this.currentLocale}. Loaded ${Object.keys(this.strings.getKeys()).length} keys from CSF.`);
+            // Prefer configured defaultLanguage for UI JSON overlay; CSF still supplies in-game strings.
+            this.currentLocale = currentConfig.defaultLocale || csfFileInstance.getIsoLocale() || 'en-US';
+            console.log(`[Application] CSF file "${csfFileName}" loaded. Detected CSF locale: ${csfFileInstance.getIsoLocale() || 'n/a'}. UI locale: ${this.currentLocale}. Loaded ${Object.keys(this.strings.getKeys()).length} keys from CSF.`);
         }
         catch (error) {
             console.error(`[Application] Failed to load or parse CSF file "${csfFileName}":`, error);
             console.warn('[Application] Falling back to empty Strings object for CSF part.');
             this.strings = new Strings();
-            this.currentLocale = currentConfig.defaultLocale;
+            this.currentLocale = currentConfig.defaultLocale || 'en-US';
         }
         const jsonLocaleFile = `res/locale/${this.currentLocale}.json?v=${this.getVersion()}`;
         console.log(`[Application] Attempting to load JSON locale file: ${jsonLocaleFile}`);

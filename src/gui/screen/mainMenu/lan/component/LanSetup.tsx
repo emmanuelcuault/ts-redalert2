@@ -72,7 +72,7 @@ function createInitialMessages(): UiChatMessage[] {
 }
 
 function shouldSurfaceSystemLog(text: string): boolean {
-    return /失败|错误|不支持|无法|超时|中断|断开|关闭|拒绝|异常/i.test(text);
+    return /失败|错误|不支持|无法|超时|中断|断开|关闭|拒绝|异常|fail|error|unsupported|unable|timeout|disconnect|closed|refused|exception/i.test(text);
 }
 
 function describeRoomTone(roomSnapshot: LanRoomSnapshot): 'good' | 'warn' | 'bad' {
@@ -87,15 +87,15 @@ function describeRoomTone(roomSnapshot: LanRoomSnapshot): 'good' | 'warn' | 'bad
 
 function describeCompactRoomState(roomSnapshot: LanRoomSnapshot): string {
     if (!roomSnapshot.isRoomActive) {
-        return '等待房主同步';
+        return 'Waiting for host sync';
     }
     if (roomSnapshot.canStart) {
-        return '连接完成';
+        return 'Connected';
     }
     if (roomSnapshot.roomState && !roomSnapshot.roomState.gameOpts.mapOfficial) {
-        return '等待地图同步';
+        return 'Waiting for map sync';
     }
-    return '等待成员互联';
+    return 'Waiting for member links';
 }
 
 function describeMemberRoleTone(member: LanRoomSnapshot['members'][number]): 'good' | 'warn' | 'bad' {
@@ -113,7 +113,7 @@ function describeCustomMapTransfer(roomSnapshot: LanRoomSnapshot): { text: strin
     const failedMember = roomSnapshot.members.find((member) => member.mapTransfer.status === 'error');
     if (failedMember) {
         return {
-            text: `地图同步失败: ${failedMember.name}`,
+            text: `Map sync failed: ${failedMember.name}`,
             tone: 'bad',
         };
     }
@@ -121,13 +121,13 @@ function describeCustomMapTransfer(roomSnapshot: LanRoomSnapshot): { text: strin
     const completedCount = roomSnapshot.members.filter((member) => member.mapTransfer.status === 'complete').length;
     if (completedCount >= roomSnapshot.members.length && roomSnapshot.members.length > 0) {
         return {
-            text: '地图同步完成',
+            text: 'Map sync complete',
             tone: 'good',
         };
     }
 
     return {
-        text: `地图同步 ${completedCount}/${roomSnapshot.members.length}`,
+        text: `Map sync ${completedCount}/${roomSnapshot.members.length}`,
         tone: 'warn',
     };
 }
@@ -142,18 +142,18 @@ function formatRecentTimestamp(timestamp: number): string {
 }
 
 function describeRecentRole(role: LanRecentPlayRecord['role']): string {
-    return role === 'host' ? '房主' : '成员';
+    return role === 'host' ? 'Host' : 'Member';
 }
 
 function formatMemberSummary(record: LanRecentPlayRecord): string {
     if (!record.memberNames.length) {
-        return `${record.memberCount} 人房间`;
+        return `${record.memberCount}-player room`;
     }
-    const visibleMembers = record.memberNames.slice(0, 3).join('、');
+    const visibleMembers = record.memberNames.slice(0, 3).join(', ');
     if (record.memberNames.length > 3) {
-        return `${visibleMembers} 等 ${record.memberCount} 人`;
+        return `${visibleMembers} (${record.memberCount} players total)`;
     }
-    return `${visibleMembers} · ${record.memberCount} 人`;
+    return `${visibleMembers} · ${record.memberCount} players`;
 }
 
 export const LanSetup: React.FC<LanSetupProps> = ({
@@ -343,11 +343,11 @@ export const LanSetup: React.FC<LanSetupProps> = ({
 
     const handleCreateInvite = async () => {
         if (!supported) {
-            appendSystemMessage('当前浏览器不支持 WebRTC。');
+            appendSystemMessage('WebRTC is not supported in this browser.');
             return;
         }
         if (!roomSession.getSnapshot().canInvite) {
-            appendSystemMessage('当前没有空闲玩家槽位，请先打开一个空位后再邀请。');
+            appendSystemMessage('No open player slots. Open a slot before inviting.');
             return;
         }
         setBusy(true);
@@ -367,12 +367,12 @@ export const LanSetup: React.FC<LanSetupProps> = ({
 
     const handleImportPayload = async (payloadText?: string) => {
         if (!supported) {
-            appendSystemMessage('当前浏览器不支持 WebRTC。');
+            appendSystemMessage('WebRTC is not supported in this browser.');
             return;
         }
         const nextPayload = (payloadText ?? manualPayloadText).trim();
         if (!nextPayload) {
-            appendSystemMessage('请先扫码，或者把二维码内容粘贴到文本框里。');
+            appendSystemMessage('Scan a code or paste QR content into the text box.');
             return;
         }
         setBusy(true);
@@ -394,17 +394,17 @@ export const LanSetup: React.FC<LanSetupProps> = ({
 
     const handleCopyPayload = async () => {
         if (!meshSnapshot.activeQrPayloadText) {
-            appendSystemMessage('当前没有可复制的二维码内容。');
+            appendSystemMessage('No QR code content to copy.');
             return;
         }
         try {
             await navigator.clipboard.writeText(meshSnapshot.activeQrPayloadText);
-            setClipboardHint('已复制到剪贴板');
-            appendSystemMessage('二维码内容已复制到剪贴板。');
+            setClipboardHint('Copied to clipboard');
+            appendSystemMessage('QR code content copied to clipboard.');
         }
         catch {
-            setClipboardHint('复制失败，请手动复制');
-            appendSystemMessage('浏览器不允许写入剪贴板，请手动复制。');
+            setClipboardHint('Copy failed; copy manually');
+            appendSystemMessage('Browser blocked clipboard write; copy manually.');
         }
     };
 
@@ -412,10 +412,10 @@ export const LanSetup: React.FC<LanSetupProps> = ({
         try {
             const text = await navigator.clipboard.readText();
             setManualPayloadText(text);
-            appendSystemMessage('已从剪贴板读取二维码内容。');
+            appendSystemMessage('Read QR code content from clipboard.');
         }
         catch {
-            appendSystemMessage('浏览器不允许读取剪贴板，请手动粘贴。');
+            appendSystemMessage('Browser blocked clipboard read; paste manually.');
         }
     };
 
@@ -444,19 +444,19 @@ export const LanSetup: React.FC<LanSetupProps> = ({
     const waitingStatusStrip = waitingMode ? (
         <div className="lan-room-status-strip">
             <div className="lan-status-chip">
-                房间号 <strong>{meshSnapshot.roomId ?? '--'}</strong>
+                Room ID <strong>{meshSnapshot.roomId ?? '--'}</strong>
             </div>
             <div className="lan-status-chip">
-                成员 <strong data-lan-stat="members">{roomSnapshot.members.length || meshSnapshot.members.length}</strong>
+                Members <strong data-lan-stat="members">{roomSnapshot.members.length || meshSnapshot.members.length}</strong>
                 <span className="lan-status-divider">/</span>
-                直连 <strong data-lan-stat="direct-peers">{meshSnapshot.directPeerCount}</strong>
+                Direct <strong data-lan-stat="direct-peers">{meshSnapshot.directPeerCount}</strong>
             </div>
             <div className={`lan-status-chip tone-${describeRoomTone(roomSnapshot)}`}>
                 {describeCompactRoomState(roomSnapshot)}
             </div>
             {selfMember ? (
                 <div className={`lan-status-chip tone-${describeMemberRoleTone(selfMember)}`}>
-                    {selfMember.isHost ? '你是房主' : selfMember.ready ? '已准备' : '未准备'}
+                    {selfMember.isHost ? 'You are host' : selfMember.ready ? 'Ready' : 'Not ready'}
                 </div>
             ) : null}
             {customMapTransfer ? (
@@ -548,20 +548,20 @@ export const LanSetup: React.FC<LanSetupProps> = ({
         <div className="lobby-form lan-setup-form lan-room-form" data-lan-view={waitingMode ? 'waiting' : 'entry'}>
             {!supported ? (
                 <div className="lan-panel">
-                    <h3>环境不支持</h3>
-                    <p>当前浏览器没有可用的 WebRTC 实现，无法在这个页面里建立局域网连接。</p>
+                    <h3>Environment not supported</h3>
+                    <p>This browser has no WebRTC implementation; LAN connections cannot be established on this page.</p>
                 </div>
             ) : !waitingMode ? (
                 <div className="lan-entry-layout">
                     <div className="lan-panel lan-entry-panel lan-entry-profile-panel">
                         <div className="lan-panel-header">
-                            <h3>玩家信息</h3>
-                            <span>右侧菜单负责创建和加入，这里只保留你的局域网档案。</span>
+                            <h3>Player info</h3>
+                            <span>Use the sidebar to create or join rooms; this panel keeps your LAN profile.</span>
                         </div>
                         <div className="lan-entry-profile-grid">
                             <div className="lan-entry-profile-editor">
                                 <label className="lan-input-label" htmlFor="lan-self-name">
-                                    玩家名称
+                                    Player name
                                 </label>
                                 <input
                                     id="lan-self-name"
@@ -579,28 +579,28 @@ export const LanSetup: React.FC<LanSetupProps> = ({
                                     }}
                                 />
                                 <div className="lan-entry-field-hint">
-                                    房间成员列表、聊天和开局后的玩家槽位都会使用这个名字。
+                                    Room member list, chat, and post-start player slots use this name.
                                 </div>
                             </div>
 
                             <div className="lan-entry-profile-stats">
                                 <div className="lan-entry-stat">
-                                    <span>当前身份</span>
+                                    <span>Current role</span>
                                     <strong>{meshSnapshot.self.name}</strong>
                                 </div>
                                 <div className="lan-entry-stat">
-                                    <span>浏览器支持</span>
+                                    <span>Browser support</span>
                                     <strong className={supported ? 'tone-good' : 'tone-bad'}>
-                                        {supported ? 'WebRTC 可用' : '不可用'}
+                                        {supported ? 'WebRTC available' : 'Unavailable'}
                                     </strong>
                                 </div>
                                 <div className="lan-entry-stat">
-                                    <span>最近房间</span>
+                                    <span>Recent room</span>
                                     <strong>{latestRecentSession?.roomId ?? '--'}</strong>
                                 </div>
                                 <div className="lan-entry-stat">
-                                    <span>最近模式</span>
-                                    <strong>{latestRecentSession?.modeLabel ?? '暂无记录'}</strong>
+                                    <span>Recent mode</span>
+                                    <strong>{latestRecentSession?.modeLabel ?? 'No records'}</strong>
                                 </div>
                             </div>
                         </div>
@@ -608,8 +608,8 @@ export const LanSetup: React.FC<LanSetupProps> = ({
 
                     <div className="lan-panel lan-entry-panel lan-entry-recent-panel">
                         <div className="lan-panel-header">
-                            <h3>最近参与</h3>
-                            <span>{recentSessions.length ? `本机保留最近 ${recentSessions.length} 次开局记录。` : '完成一次开局后会自动记录在这里。'}</span>
+                            <h3>Recent sessions</h3>
+                            <span>{recentSessions.length ? `Keeping the last ${recentSessions.length} match records on this device.` : 'Records appear here after you complete a match.'}</span>
                         </div>
                         {recentSessions.length ? (
                             <List className="lan-entry-recent-list">
@@ -622,8 +622,8 @@ export const LanSetup: React.FC<LanSetupProps> = ({
                                         <div className="lan-entry-recent-item-meta">
                                             <span className="lan-entry-recent-chip">{describeRecentRole(record.role)}</span>
                                             <span>{record.modeLabel}</span>
-                                            <span>房间 {record.roomId}</span>
-                                            <span>{record.mapOfficial ? '官方地图' : '自定义地图'}</span>
+                                            <span>Room {record.roomId}</span>
+                                            <span>{record.mapOfficial ? 'Official map' : 'Custom map'}</span>
                                         </div>
                                         <div className="lan-entry-recent-item-members">
                                             {formatMemberSummary(record)}
@@ -633,7 +633,7 @@ export const LanSetup: React.FC<LanSetupProps> = ({
                             </List>
                         ) : (
                             <div className="lan-entry-empty-state">
-                                右侧可以直接创建房间或加入房间。完成一次联机开局后，最近参与记录会显示在这里。
+                                Create or join a room from the sidebar. After you finish a LAN match, recent sessions appear here.
                             </div>
                         )}
                     </div>
@@ -646,7 +646,7 @@ export const LanSetup: React.FC<LanSetupProps> = ({
                         </div>
                     ) : (
                         <div className="lan-panel lan-room-loading-panel lan-room-loading-panel-compact">
-                            正在接收房间配置...
+                            Receiving room configuration...
                         </div>
                     )}
                 </div>
@@ -656,7 +656,7 @@ export const LanSetup: React.FC<LanSetupProps> = ({
                 <div className="lan-dialog-overlay" onClick={() => setInviteDialogOpen(false)}>
                     <div className="lan-dialog" onClick={(event) => event.stopPropagation()}>
                         <div className="lan-dialog-header">
-                            <h3>邀请其他玩家</h3>
+                            <h3>Invite other players</h3>
                             <button type="button" className="lan-dialog-close" onClick={() => setInviteDialogOpen(false)}>
                                 ×
                             </button>
@@ -665,12 +665,12 @@ export const LanSetup: React.FC<LanSetupProps> = ({
                                 <div className="lan-dialog-grid">
                                     <div className="lan-panel">
                                         <div className="lan-panel-header">
-                                            <h3>邀请二维码</h3>
-                                            <span>新玩家先扫这张码。</span>
+                                            <h3>Invite QR code</h3>
+                                            <span>New players scan this code first.</span>
                                         </div>
                                         <QrCodeCard
-                                            title={meshSnapshot.activeQrPayloadTitle ?? '邀请二维码'}
-                                            description={meshSnapshot.activeQrPayloadDescription ?? '等待生成二维码。'}
+                                            title={meshSnapshot.activeQrPayloadTitle ?? 'Invite QR code'}
+                                            description={meshSnapshot.activeQrPayloadDescription ?? 'Waiting for QR code generation.'}
                                             payloadText={meshSnapshot.activeQrPayloadText}
                                         />
                                         <textarea
@@ -678,7 +678,7 @@ export const LanSetup: React.FC<LanSetupProps> = ({
                                             readOnly={true}
                                             value={meshSnapshot.activeQrPayloadText}
                                             data-lan-output="active-payload"
-                                            placeholder="二维码原始内容。"
+                                            placeholder="Raw QR code content."
                                         />
                                         <div className="lan-actions">
                                             <button
@@ -690,7 +690,7 @@ export const LanSetup: React.FC<LanSetupProps> = ({
                                                     void handleCreateInvite();
                                                 }}
                                             >
-                                                重新生成邀请二维码
+                                                Regenerate invite QR code
                                             </button>
                                             <button
                                                 type="button"
@@ -701,7 +701,7 @@ export const LanSetup: React.FC<LanSetupProps> = ({
                                                     void handleCopyPayload();
                                                 }}
                                             >
-                                                复制二维码内容
+                                                Copy QR content
                                             </button>
                                             {clipboardHint ? <span className="lan-hint">{clipboardHint}</span> : null}
                                         </div>
@@ -709,8 +709,8 @@ export const LanSetup: React.FC<LanSetupProps> = ({
 
                                     <div className="lan-panel">
                                         <div className="lan-panel-header">
-                                            <h3>接收加入响应</h3>
-                                            <span>新玩家扫完邀请后，把响应码扫回这里。</span>
+                                            <h3>Receive join response</h3>
+                                            <span>After scanning the invite, scan the response code back here.</span>
                                         </div>
                                         <QrScannerPanel
                                             onDetected={async (payloadText) => {
@@ -724,7 +724,7 @@ export const LanSetup: React.FC<LanSetupProps> = ({
                                                 data-lan-action="toggle-invite-manual"
                                                 onClick={() => setShowAdvancedInvite((current) => !current)}
                                             >
-                                                {showAdvancedInvite ? '隐藏高级方式' : '显示高级方式'}
+                                                {showAdvancedInvite ? 'Hide advanced' : 'Show advanced'}
                                             </button>
                                         </div>
                                         {showAdvancedInvite ? (
@@ -734,7 +734,7 @@ export const LanSetup: React.FC<LanSetupProps> = ({
                                                     value={manualResponsePayloadText}
                                                     data-lan-input="invite-response-payload"
                                                     onChange={(event) => setManualResponsePayloadText(event.target.value)}
-                                                    placeholder="把加入响应二维码内容粘贴到这里，然后点击导入。"
+                                                    placeholder="Paste join response QR content here, then click Import."
                                                 />
                                                 <div className="lan-actions">
                                                     <button
@@ -746,7 +746,7 @@ export const LanSetup: React.FC<LanSetupProps> = ({
                                                             void handleImportPayload(manualResponsePayloadText).catch(() => undefined);
                                                         }}
                                                     >
-                                                        导入加入响应
+                                                        Import join response
                                                     </button>
                                                     <button
                                                         type="button"
@@ -756,14 +756,14 @@ export const LanSetup: React.FC<LanSetupProps> = ({
                                                             try {
                                                                 const text = await navigator.clipboard.readText();
                                                                 setManualResponsePayloadText(text);
-                                                                appendSystemMessage('已从剪贴板读取加入响应。');
+                                                                appendSystemMessage('Read join response from clipboard.');
                                                             }
                                                             catch {
-                                                                appendSystemMessage('浏览器不允许读取剪贴板，请手动粘贴。');
+                                                                appendSystemMessage('Browser blocked clipboard read; paste manually.');
                                                             }
                                                         }}
                                                     >
-                                                        从剪贴板粘贴
+                                                        Paste from clipboard
                                                     </button>
                                                     <button
                                                         type="button"
@@ -771,12 +771,12 @@ export const LanSetup: React.FC<LanSetupProps> = ({
                                                         disabled={!manualResponsePayloadText}
                                                         onClick={() => setManualResponsePayloadText('')}
                                                     >
-                                                        清空
+                                                        Clear
                                                     </button>
                                                 </div>
                                             </>
                                         ) : (
-                                            <p className="lan-join-hint">优先扫码，只有需要排障时再展开高级方式。</p>
+                                            <p className="lan-join-hint">Prefer scanning; expand advanced options only for troubleshooting.</p>
                                         )}
                                     </div>
                                 </div>
@@ -789,7 +789,7 @@ export const LanSetup: React.FC<LanSetupProps> = ({
                 <div className="lan-dialog-overlay" onClick={() => setJoinDialogOpen(false)}>
                     <div className="lan-dialog lan-dialog-wide" onClick={(event) => event.stopPropagation()}>
                         <div className="lan-dialog-header">
-                            <h3>加入房间</h3>
+                            <h3>Join room</h3>
                             <button type="button" className="lan-dialog-close" onClick={() => setJoinDialogOpen(false)}>
                                 ×
                             </button>
@@ -798,12 +798,12 @@ export const LanSetup: React.FC<LanSetupProps> = ({
                             {meshSnapshot.activeQrPayloadKind === 'join-response' ? (
                                 <div className="lan-panel">
                                     <div className="lan-panel-header">
-                                        <h3>加入响应二维码</h3>
-                                        <span>把这张码给房主扫描即可。</span>
+                                        <h3>Join response QR code</h3>
+                                        <span>Have the host scan this code.</span>
                                     </div>
                                     <QrCodeCard
-                                        title={meshSnapshot.activeQrPayloadTitle ?? '加入响应二维码'}
-                                        description={meshSnapshot.activeQrPayloadDescription ?? '等待房主扫描这张二维码。'}
+                                        title={meshSnapshot.activeQrPayloadTitle ?? 'Join response QR code'}
+                                        description={meshSnapshot.activeQrPayloadDescription ?? 'Waiting for the host to scan this QR code.'}
                                         payloadText={meshSnapshot.activeQrPayloadText}
                                     />
                                     <textarea
@@ -811,7 +811,7 @@ export const LanSetup: React.FC<LanSetupProps> = ({
                                         readOnly={true}
                                         value={meshSnapshot.activeQrPayloadText}
                                         data-lan-output="active-payload"
-                                        placeholder="响应二维码原始内容。"
+                                        placeholder="Raw join response QR content."
                                     />
                                     <div className="lan-actions">
                                         <button
@@ -822,7 +822,7 @@ export const LanSetup: React.FC<LanSetupProps> = ({
                                                 void handleCopyPayload();
                                             }}
                                         >
-                                            复制响应内容
+                                            Copy response content
                                         </button>
                                         {clipboardHint ? <span className="lan-hint">{clipboardHint}</span> : null}
                                     </div>
@@ -838,8 +838,8 @@ export const LanSetup: React.FC<LanSetupProps> = ({
 
                                 <div className="lan-panel">
                                     <div className="lan-panel-header">
-                                        <h3>回退方式</h3>
-                                        <span>无法扫码时改为粘贴文本。</span>
+                                        <h3>Fallback</h3>
+                                        <span>Paste text when scanning is not possible.</span>
                                     </div>
                                     <div className="lan-actions">
                                         <button
@@ -848,7 +848,7 @@ export const LanSetup: React.FC<LanSetupProps> = ({
                                             data-lan-action="toggle-manual"
                                             onClick={() => setShowAdvancedJoin((current) => !current)}
                                         >
-                                            {showAdvancedJoin ? '隐藏高级方式' : '显示高级方式'}
+                                            {showAdvancedJoin ? 'Hide advanced' : 'Show advanced'}
                                         </button>
                                     </div>
                                     {showAdvancedJoin ? (
@@ -858,7 +858,7 @@ export const LanSetup: React.FC<LanSetupProps> = ({
                                                 value={manualPayloadText}
                                                 data-lan-input="manual-payload"
                                                 onChange={(event) => setManualPayloadText(event.target.value)}
-                                                placeholder="把二维码内容粘贴到这里，然后点击导入。"
+                                                placeholder="Paste QR content here, then click Import."
                                             />
                                             <div className="lan-actions">
                                                 <button
@@ -870,7 +870,7 @@ export const LanSetup: React.FC<LanSetupProps> = ({
                                                         void handleImportPayload().catch(() => undefined);
                                                     }}
                                                 >
-                                                    导入二维码内容
+                                                    Import QR content
                                                 </button>
                                                 <button
                                                     type="button"
@@ -880,7 +880,7 @@ export const LanSetup: React.FC<LanSetupProps> = ({
                                                         void handlePastePayload();
                                                     }}
                                                 >
-                                                    从剪贴板粘贴
+                                                    Paste from clipboard
                                                 </button>
                                                 <button
                                                     type="button"
@@ -888,12 +888,12 @@ export const LanSetup: React.FC<LanSetupProps> = ({
                                                     disabled={!manualPayloadText}
                                                     onClick={() => setManualPayloadText('')}
                                                 >
-                                                    清空
+                                                    Clear
                                                 </button>
                                             </div>
                                         </>
                                     ) : (
-                                        <p className="lan-join-hint">默认扫码即可，高级方式只作兜底。</p>
+                                        <p className="lan-join-hint">Scanning is the default; advanced options are a fallback.</p>
                                     )}
                                 </div>
                             </div>
